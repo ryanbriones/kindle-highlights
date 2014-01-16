@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require "kindle_highlights/downloads_kindle_highlights_html"
+
+downloader = KindleHighlights::DownloadsKindleHighlightsHTML.new(
+              ENV["KINDLE_USERNAME"], ENV["KINDLE_PASSWORD"] )
+puts downloader.get_all_highlights

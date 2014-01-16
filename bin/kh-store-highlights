@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+require "pg"
+require "uri"
+
+require "kindle_highlights/downloads_kindle_highlights_html"
+require "kindle_highlights/parses_books_from_highlights_html"
+
+html = if ENV["HIGHLIGHTS_CACHE"]
+  File.read(ENV["HIGHLIGHTS_CACHE"])
+else
+  downloader = KindleHighlights::DownloadsKindleHighlightsHTML.new(
+                ENV["KINDLE_USERNAME"], ENV["KINDLE_PASSWORD"] )
+  downloader.get_all_highlights
+end
+
+parser = KindleHighlights::ParsesBooksFromHighlightsHTML.new(html)
+books = parser.get_books_with_highlights
+
+db_uri = URI.parse(ENV["DATABASE_URL"] || "postgres://localhost:5432/kindle_highlights_dev")
+DB = PG.connect(
+  db_uri.host, 
+  db_uri.port, 
+  nil, 
+  nil, 
+  db_uri.path[1..-1], 
+  db_uri.user,
+  db_uri.password)
+
+books.each do |book|
+  book.save
+  
+  book.highlights.each do |highlight|
+    highlight.save
+  end
+end
