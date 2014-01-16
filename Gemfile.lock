@@ -31,5 +31,6 @@ PLATFORMS
 
 DEPENDENCIES
   capybara
+  nokogiri
   pg
   poltergeist
